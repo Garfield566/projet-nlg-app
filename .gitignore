@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Node
+node_modules/
+renderer-dist/
+dist/
+
+# Outputs
+output/
+output_math_test/
+*.canvas
+*.md
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets
+nlg-settings.json
