@@ -277,16 +277,19 @@ function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").repl
 
 // GitHub Issue creation
 async function createIssue(title, body, labels) {
-  const token = localStorage.getItem("nlg_token");
-  const repo = localStorage.getItem("nlg_repo");
-  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub"); }
+  const token = (localStorage.getItem("nlg_token")||"").trim();
+  const repo = (localStorage.getItem("nlg_repo")||"").trim();
+  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub d'abord"); }
 
-  const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ title, body, labels }),
-  });
-  if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.status); }
+  let resp;
+  try {
+    resp = await fetch("https://api.github.com/repos/" + repo + "/issues", {
+      method: "POST",
+      headers: { "Authorization": "token " + token, "Content-Type": "application/json", "Accept": "application/vnd.github.v3+json" },
+      body: JSON.stringify({ title: title, body: body, labels: labels }),
+    });
+  } catch (e) { throw new Error("Erreur reseau: " + e.message); }
+  if (!resp.ok) { let msg="HTTP "+resp.status; try{const e=await resp.json();msg=e.message||msg;}catch{} throw new Error(msg); }
   return resp.json();
 }
 
