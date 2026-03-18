@@ -202,12 +202,12 @@ function updateItem(id, field, val) {
   it[field] = val;
   if (field === "family") { it.category = ""; it.subtype = ""; }
   if (field === "category") { it.subtype = ""; }
+  // Ne pas re-render pour les frappes clavier (sinon le clavier mobile se ferme)
+  if (field === "sujet") { updateFooter(); return; }
   render();
 }
 
-function render() {
-  const list = document.getElementById("list");
-  list.innerHTML = items.map((it, idx) => it.kind === "note" ? renderNote(it, idx) : renderCanvas(it, idx)).join("");
+function updateFooter() {
   const ready = items.filter(i => i.sujet.trim() && (i.kind === "canvas" || (i.family && i.category)));
   const done = items.filter(i => i.status === "done").length;
   const allDone = done > 0 && done === items.filter(i => i.sujet.trim()).length;
@@ -216,6 +216,11 @@ function render() {
   document.getElementById("doneMsg").style.display = allDone ? "block" : "none";
   document.getElementById("doneMsg").textContent = allDone ? `✓ ${done} element${done>1?"s":""} genere${done>1?"s":""}` : "";
   document.getElementById("btnReset").style.display = allDone ? "block" : "none";
+}
+
+function render() {
+  document.getElementById("list").innerHTML = items.map((it, idx) => it.kind === "note" ? renderNote(it, idx) : renderCanvas(it, idx)).join("");
+  updateFooter();
 }
 
 function renderNote(it, idx) {
