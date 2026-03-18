@@ -4,13 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>NLG</title>
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="NLG">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#f2d4c4">
-<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -66,8 +59,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
 .row{display:flex;gap:8px}
 .row>*{flex:1}
-.row3{display:flex;gap:6px}
-.row3>*{flex:1}
 
 /* Status */
 .status{margin-top:8px;font-size:11px;display:flex;align-items:center;gap:5px}
@@ -116,10 +107,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 <body>
 <div class="app">
   <div class="header">
-    <div style="display:flex;align-items:center;gap:12px">
-      <img src="logo.png" alt="NLG" style="width:42px;height:42px;border-radius:12px;box-shadow:0 2px 8px rgba(100,60,30,.12)">
-      <h1>Nouvelle note</h1>
-    </div>
+    <h1>Nouvelle note</h1>
     <div class="line"></div>
   </div>
 
@@ -146,41 +134,16 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 </div>
 
 <script>
-const TEMPLATES = {
-  general: { label:"General", types: {
-    personnage:{label:"Personnage",stl:"Sous-type",opt:true,items:["Scientifique","Souverain","Artiste","Militaire","Philosophe","Politique","Religieux","Explorateur"]},
-    lieu:{label:"Lieu",stl:"Sous-type",opt:true,items:["Ville","Pays","Region","Continent","Monument"]},
-    evenement:{label:"Evenement",stl:"Sous-type",opt:true,items:["Bataille","Revolution","Traite","Catastrophe","Decouverte"]},
-    oeuvre:{label:"Oeuvre",stl:"Sous-type",opt:true,items:["Livre","Film","Peinture","Musique","Sculpture"]},
-    organisation:{label:"Organisation",stl:"Sous-type",opt:true,items:["Entreprise","ONG","Institution","Parti politique"]},
-    periode:{label:"Periode",stl:"Sous-type",opt:true,items:["Ere geologique","Epoque historique","Mouvement"]},
-    concept:{label:"Concept",stl:"Domaine",opt:false,items:["Philosophie","Physique","Economie","Informatique","Biologie","Sociologie","Droit","Linguistique"]},
-    objet:{label:"Objet",stl:"Domaine",opt:false,items:["Technologie","Instrument","Outil","Arme","Vehicule","Monnaie"]},
-    processus:{label:"Processus",stl:"Domaine",opt:false,items:["Chimie","Biologie","Industrie","Informatique","Physique"]},
-  }},
-  specifique: { label:"Specifique", types: {
-    mathematiques:{label:"Mathematiques",stl:"Template",opt:false,items:["Theoreme","Conjecture"]},
-    biologie:{label:"Biologie",stl:"Template",opt:false,items:["Taxon"]},
-    chimie:{label:"Chimie",stl:"Template",opt:false,items:["Compose chimique","Element chimique"]},
-    cuisine:{label:"Cuisine",stl:"Template",opt:false,items:["Recette"]},
-    droit:{label:"Droit",stl:"Template",opt:false,items:["Texte juridique"]},
-    economie:{label:"Economie",stl:"Template",opt:false,items:["Accord commercial","Concept economique","Crise economique","Ecole economique","Economiste","Groupe/Entreprise","Indicateur economique","Marche","Politique economique","Ressource economique","Secteur economique","Theorie economique"]},
-    histoire:{label:"Histoire",stl:"Template",opt:false,items:["Bataille","Dynastie","Traite"]},
-    jeux_strategiques:{label:"Jeux strategiques",stl:"Template",opt:false,items:["Joseki (Go)","Ouverture (Echecs)"]},
-    linguistique:{label:"Linguistique",stl:"Template",opt:false,items:["Categorie grammaticale","Construction syntaxique","Mot","Phoneme"]},
-    musique:{label:"Musique",stl:"Template",opt:false,items:["Instrument","Oeuvre musicale"]},
-    mythologie:{label:"Mythologie",stl:"Template",opt:false,items:["Divinite"]},
-    numismatique:{label:"Numismatique",stl:"Template",opt:false,items:["Reforme monetaire"]},
-    physique:{label:"Physique",stl:"Template",opt:false,items:["Constante physique","Loi physique"]},
-  }}
-};
-const SPEC_MAP={"Theoreme":"theoreme","Conjecture":"conjecture","Taxon":"taxon","Compose chimique":"compose_chimique","Element chimique":"element_chimique","Recette":"recette","Texte juridique":"texte_juridique","Accord commercial":"accord_commercial","Concept economique":"concept_economique","Crise economique":"crise_economique","Ecole economique":"ecole_economique","Economiste":"economiste","Groupe/Entreprise":"groupe_entreprise","Indicateur economique":"indicateur_economique","Marche":"marche","Politique economique":"politique_economique","Ressource economique":"ressource_economique","Secteur economique":"secteur_economique","Theorie economique":"theorie_economique","Bataille":"bataille","Dynastie":"dynastie","Traite":"traite","Joseki (Go)":"joseki_go","Ouverture (Echecs)":"ouverture_echecs","Categorie grammaticale":"categorie_grammaticale","Construction syntaxique":"construction_syntaxique","Mot":"mot","Phoneme":"phoneme","Instrument":"instrument_musique","Oeuvre musicale":"oeuvre_musicale","Divinite":"divinite","Reforme monetaire":"reforme_monetaire","Constante physique":"constante_physique","Loi physique":"loi_physique"};
-const PERSO_MAP={"Scientifique":"personnage-scientifique","Souverain":"personnage-souverain","Artiste":"personnage-artiste","Militaire":"personnage-militaire","Philosophe":"personnage-scientifique","Politique":"personnage-militaire","Religieux":"personnage-artiste","Explorateur":"personnage-aventurier"};
-function resoudreCategorie(fam,cat,sub){
-  if(cat==="personnage") return PERSO_MAP[sub]||"personnage-militaire";
-  if(fam==="specifique"&&sub&&SPEC_MAP[sub]) return SPEC_MAP[sub];
-  return cat;
-}
+const CATEGORIES = [
+  {v:"concept",l:"Concept"},{v:"evenement",l:"Evenement"},
+  {v:"personnage-scientifique",l:"Personnage scientifique"},
+  {v:"personnage-militaire",l:"Personnage militaire"},
+  {v:"personnage-artiste",l:"Personnage artiste"},
+  {v:"personnage-souverain",l:"Personnage souverain"},
+  {v:"lieu",l:"Lieu"},{v:"oeuvre",l:"Oeuvre"},{v:"organisation",l:"Organisation"},
+  {v:"periode",l:"Periode"},{v:"processus",l:"Processus"},
+  {v:"theoreme",l:"Theoreme"},{v:"conjecture",l:"Conjecture"},
+];
 const TEMPLATES_CANVAS = [
   {v:"",l:"Auto"},{v:"mindmap",l:"Mindmap"},{v:"grid",l:"Grille"},
   {v:"tree",l:"Arbre"},{v:"flowchart",l:"Flowchart"},{v:"cycle",l:"Cycle"},
@@ -195,8 +158,7 @@ let nextId = 1;
 function addItem(kind) {
   items.push({
     id: nextId++, kind,
-    sujet: "", family: "", category: "", subtype: "",
-    canvasType: "normal", template: "",
+    sujet: "", categorie: "concept", canvasType: "normal", template: "",
     status: "idle", error: null,
   });
   render();
@@ -208,17 +170,13 @@ function removeItem(id) {
 
 function updateItem(id, field, val) {
   const it = items.find(i => i.id === id);
-  if (!it) return;
-  it[field] = val;
-  if (field === "family") { it.category = ""; it.subtype = ""; }
-  if (field === "category") { it.subtype = ""; }
-  // Ne pas re-render pour les frappes clavier (sinon le clavier mobile se ferme)
-  if (field === "sujet") { updateFooter(); return; }
-  render();
+  if (it) { it[field] = val; render(); }
 }
 
-function updateFooter() {
-  const ready = items.filter(i => i.sujet.trim() && (i.kind === "canvas" || (i.family && i.category)));
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = items.map((it, idx) => it.kind === "note" ? renderNote(it, idx) : renderCanvas(it, idx)).join("");
+  const ready = items.filter(i => i.sujet.trim() && (i.kind === "canvas" || i.categorie));
   const done = items.filter(i => i.status === "done").length;
   const allDone = done > 0 && done === items.filter(i => i.sujet.trim()).length;
   document.getElementById("btnGenerate").disabled = ready.length === 0 || allDone;
@@ -228,34 +186,18 @@ function updateFooter() {
   document.getElementById("btnReset").style.display = allDone ? "block" : "none";
 }
 
-function render() {
-  document.getElementById("list").innerHTML = items.map((it, idx) => it.kind === "note" ? renderNote(it, idx) : renderCanvas(it, idx)).join("");
-  updateFooter();
-}
-
 function renderNote(it, idx) {
-  const famData = it.family ? TEMPLATES[it.family] : null;
-  const typeData = famData && it.category ? famData.types[it.category] : null;
-  let famOpts = `<option value="">Choisir…</option>`;
-  for (const [k,v] of Object.entries(TEMPLATES)) famOpts += `<option value="${k}" ${it.family===k?"selected":""}>${v.label}</option>`;
-  let typeOpts = `<option value="">${it.family?"Choisir…":"—"}</option>`;
-  if (famData) for (const [k,v] of Object.entries(famData.types)) typeOpts += `<option value="${k}" ${it.category===k?"selected":""}>${v.label}</option>`;
-  const stl = typeData ? typeData.stl : "Sous-type";
-  const stOpt = typeData ? typeData.opt : false;
-  let stOpts = `<option value="">${typeData?(stOpt?"Aucun":"Choisir…"):"—"}</option>`;
-  if (typeData) for (const item of typeData.items) stOpts += `<option value="${item}" ${it.subtype===item?"selected":""}>${item}</option>`;
+  const catOpts = CATEGORIES.map(c => `<option value="${c.v}" ${it.categorie===c.v?"selected":""}>${c.l}</option>`).join("");
   return `<div class="card card-note">
     <span class="card-tag">#${idx+1}</span>
     ${items.length>1?`<button class="remove" onclick="removeItem(${it.id})">✕</button>`:""}
-    <div style="margin-top:8px">
+    <div style="margin-top:6px">
       <label>Sujet</label>
-      <input type="text" value="${esc(it.sujet)}" placeholder="ex: Pythagore, Theoreme de Fermat…"
+      <input type="text" value="${esc(it.sujet)}" placeholder="ex: Pythagore, Guerre froide…"
         oninput="updateItem(${it.id},'sujet',this.value)">
     </div>
-    <div class="row3">
-      <div><label>Template</label><select onchange="updateItem(${it.id},'family',this.value)" style="color:${it.family?'#4a3528':'#b0967e'}">${famOpts}</select></div>
-      <div><label>${it.family==="specifique"?"Domaine":"Type"}</label><select onchange="updateItem(${it.id},'category',this.value)" ${!it.family?"disabled":""} style="color:${it.category?'#4a3528':'#b0967e'};opacity:${it.family?1:.45}">${typeOpts}</select></div>
-      <div><label>${stl}${stOpt?" (opt.)":""}</label><select onchange="updateItem(${it.id},'subtype',this.value)" ${!typeData?"disabled":""} style="color:${it.subtype?'#4a3528':'#b0967e'};opacity:${typeData?1:.45}">${stOpts}</select></div>
+    <div class="row">
+      <div><label>Categorie</label><select onchange="updateItem(${it.id},'categorie',this.value)">${catOpts}</select></div>
     </div>
     ${statusHtml(it)}
   </div>`;
@@ -281,7 +223,7 @@ function renderCanvas(it, idx) {
 }
 
 function statusHtml(it) {
-  if (it.status === "idle" && it.sujet.trim() && (it.kind === "canvas" || (it.family && it.category))) return `<div class="status status-ready"><span class="dot"></span>Pret</div>`;
+  if (it.status === "idle" && it.sujet.trim()) return `<div class="status status-ready"><span class="dot"></span>Pret</div>`;
   if (it.status === "sending") return `<div class="status status-sending"><span class="spinner"></span>Envoi…</div>`;
   if (it.status === "done") return `<div class="status status-done"><span class="dot"></span>✓ Envoye — generation en cours sur le PC</div>`;
   if (it.status === "error") return `<div class="status status-error"><span class="dot"></span>${esc(it.error)}</div>`;
@@ -292,19 +234,16 @@ function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").repl
 
 // GitHub Issue creation
 async function createIssue(title, body, labels) {
-  const token = (localStorage.getItem("nlg_token")||"").trim();
-  const repo = (localStorage.getItem("nlg_repo")||"").trim();
-  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub d'abord"); }
+  const token = localStorage.getItem("nlg_token");
+  const repo = localStorage.getItem("nlg_repo");
+  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub"); }
 
-  let resp;
-  try {
-    resp = await fetch("https://api.github.com/repos/" + repo + "/issues", {
-      method: "POST",
-      headers: { "Authorization": "token " + token, "Content-Type": "application/json", "Accept": "application/vnd.github.v3+json" },
-      body: JSON.stringify({ title: title, body: body, labels: labels }),
-    });
-  } catch (e) { throw new Error("Erreur reseau: " + e.message); }
-  if (!resp.ok) { let msg="HTTP "+resp.status; try{const e=await resp.json();msg=e.message||msg;}catch{} throw new Error(msg); }
+  const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ title, body, labels }),
+  });
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.status); }
   return resp.json();
 }
 
@@ -318,8 +257,7 @@ async function generateAll() {
 
     try {
       if (it.kind === "note") {
-        const cat = resoudreCategorie(it.family, it.category, it.subtype);
-        const body = JSON.stringify({ action: "generate_note", sujet: it.sujet, categorie: cat });
+        const body = JSON.stringify({ action: "generate_note", sujet: it.sujet, categorie: it.categorie });
         await createIssue(`[NLG-NOTE] ${it.sujet}`, "```json\n"+body+"\n```", ["nlg-request","note"]);
       } else {
         const body = JSON.stringify({ action: "generate_canvas", sujet: it.sujet, mode: it.canvasType, template: it.template || null });
