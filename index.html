@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>NLG - Generateur</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    background: linear-gradient(155deg, #f2d4c4 0%, #ecc8b8 40%, #e8c4b0 100%);
+    min-height: 100vh; padding: 20px;
+    color: #4a3528;
+  }
+  .card {
+    background: #fffbf7; border-radius: 20px; padding: 24px;
+    box-shadow: 0 8px 32px rgba(100,60,30,0.1);
+    max-width: 420px; margin: 0 auto;
+  }
+  h1 {
+    font-size: 28px; font-weight: 600; color: #6b3a3a;
+    font-style: italic; margin-bottom: 4px;
+    font-family: Georgia, serif;
+  }
+  .subtitle { font-size: 12px; color: #b0967e; margin-bottom: 20px; }
+  label {
+    display: block; font-size: 11px; color: #8a6a50;
+    margin-bottom: 4px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  input, select {
+    width: 100%; padding: 12px 14px; border: 1px solid rgba(180,140,100,0.25);
+    border-radius: 12px; font-size: 15px; background: rgba(255,255,255,0.85);
+    color: #4a3528; outline: none; margin-bottom: 14px;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus { border-color: #c4704b; box-shadow: 0 0 0 3px rgba(196,112,75,0.08); }
+  select { cursor: pointer; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 24px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-note {
+    background: linear-gradient(135deg, #c4836a, #b8705a);
+    color: #fff; box-shadow: 0 4px 16px rgba(180,100,70,0.2);
+    margin-bottom: 10px;
+  }
+  .btn-canvas {
+    background: linear-gradient(135deg, #4a6a8a, #3a5a7a);
+    color: #fff; box-shadow: 0 4px 16px rgba(60,80,120,0.2);
+    margin-bottom: 10px;
+  }
+  .btn-send {
+    background: linear-gradient(135deg, #4a3528, #3a2a1e);
+    color: #f5e6d3; box-shadow: 0 4px 16px rgba(50,30,15,0.15);
+  }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .status {
+    margin-top: 14px; padding: 12px; border-radius: 12px;
+    font-size: 13px; text-align: center; display: none;
+  }
+  .status.ok { display: block; background: #e8f0e2; color: #4a6a3a; }
+  .status.err { display: block; background: #f5ebe8; color: #c45a4a; }
+  .status.loading { display: block; background: #eef2f8; color: #4a6a8a; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab {
+    flex: 1; padding: 10px; border-radius: 12px; text-align: center;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 2px solid rgba(180,140,100,0.2); background: rgba(255,255,255,0.5);
+    color: #8a6a50; transition: all 0.2s;
+  }
+  .tab.active { border-color: #c4704b; background: rgba(196,112,75,0.08); color: #6b3a3a; }
+  .tab.active-blue { border-color: #4a6a8a; background: rgba(74,106,138,0.08); color: #3a5a7a; }
+  .section { display: none; }
+  .section.visible { display: block; }
+  .config {
+    margin-bottom: 16px; padding: 12px; border-radius: 12px;
+    background: rgba(245,235,225,0.5); border: 1px dashed rgba(180,140,100,0.3);
+  }
+  .config label { margin-bottom: 2px; }
+  .config input { margin-bottom: 8px; font-size: 12px; padding: 8px 10px; }
+  .saved { font-size: 11px; color: #6a8a5a; }
+  hr { border: none; border-top: 1px solid rgba(180,140,100,0.15); margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>NLG Mobile</h1>
+  <p class="subtitle">Generateur de notes & canvas Obsidian</p>
+
+  <!-- Config GitHub (une seule fois) -->
+  <div class="config" id="configSection">
+    <label>GITHUB TOKEN</label>
+    <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+    <label>REPO (owner/name)</label>
+    <input type="text" id="repo" placeholder="ex: monuser/projet-nlg-app">
+    <button class="btn btn-note" onclick="saveConfig()" style="padding:10px; font-size:13px;">
+      Sauvegarder
+    </button>
+    <span class="saved" id="configSaved"></span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" id="tabNote" onclick="switchTab('note')">Note</div>
+    <div class="tab" id="tabCanvas" onclick="switchTab('canvas')">Canvas</div>
+  </div>
+
+  <!-- Note form -->
+  <div class="section visible" id="noteSection">
+    <label>SUJET</label>
+    <input type="text" id="noteSujet" placeholder="ex: Theoreme de Pythagore">
+    <div class="row">
+      <div>
+        <label>CATEGORIE</label>
+        <select id="noteCategorie">
+          <option value="concept">Concept</option>
+          <option value="evenement">Evenement</option>
+          <option value="personnage-scientifique">Personnage scientifique</option>
+          <option value="personnage-militaire">Personnage militaire</option>
+          <option value="personnage-artiste">Personnage artiste</option>
+          <option value="personnage-souverain">Personnage souverain</option>
+          <option value="lieu">Lieu</option>
+          <option value="oeuvre">Oeuvre</option>
+          <option value="organisation">Organisation</option>
+          <option value="periode">Periode</option>
+          <option value="processus">Processus</option>
+          <option value="theoreme">Theoreme</option>
+          <option value="conjecture">Conjecture</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-send" id="btnNote" onclick="sendNote()">
+      Envoyer
+    </button>
+  </div>
+
+  <!-- Canvas form -->
+  <div class="section" id="canvasSection">
+    <label>SUJET / TAG / DOSSIER</label>
+    <input type="text" id="canvasSujet" placeholder="ex: Guerre froide, mathematiques">
+    <div class="row">
+      <div>
+        <label>MODE</label>
+        <select id="canvasMode">
+          <option value="normal">Sujet (Wikipedia)</option>
+          <option value="tag">Tag</option>
+          <option value="dossier">Dossier</option>
+        </select>
+      </div>
+      <div>
+        <label>TEMPLATE</label>
+        <select id="canvasTemplate">
+          <option value="">Auto</option>
+          <option value="mindmap">Mindmap</option>
+          <option value="grid">Grille</option>
+          <option value="tree">Arbre</option>
+          <option value="flowchart">Flowchart</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-send" id="btnCanvas" onclick="sendCanvas()">
+      Envoyer
+    </button>
+  </div>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+// ── Config persistence ──
+function saveConfig() {
+  const token = document.getElementById('token').value.trim();
+  const repo = document.getElementById('repo').value.trim();
+  if (token && repo) {
+    localStorage.setItem('nlg_token', token);
+    localStorage.setItem('nlg_repo', repo);
+    document.getElementById('configSaved').textContent = 'Sauvegarde !';
+    document.getElementById('configSection').style.display = 'none';
+  }
+}
+
+function loadConfig() {
+  const token = localStorage.getItem('nlg_token');
+  const repo = localStorage.getItem('nlg_repo');
+  if (token && repo) {
+    document.getElementById('token').value = token;
+    document.getElementById('repo').value = repo;
+    document.getElementById('configSection').style.display = 'none';
+  }
+  return { token, repo };
+}
+
+// ── Tabs ──
+function switchTab(tab) {
+  document.getElementById('tabNote').className = tab === 'note' ? 'tab active' : 'tab';
+  document.getElementById('tabCanvas').className = tab === 'canvas' ? 'tab active-blue' : 'tab';
+  document.getElementById('noteSection').className = tab === 'note' ? 'section visible' : 'section';
+  document.getElementById('canvasSection').className = tab === 'canvas' ? 'section visible' : 'section';
+}
+
+// ── Status display ──
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+}
+
+// ── GitHub Issue creation ──
+async function createIssue(title, body, labels) {
+  const { token, repo } = loadConfig();
+  if (!token || !repo) {
+    document.getElementById('configSection').style.display = 'block';
+    showStatus('Configurez le token GitHub et le repo', 'err');
+    return false;
+  }
+
+  showStatus('Envoi en cours...', 'loading');
+
+  try {
+    const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github+json',
+      },
+      body: JSON.stringify({ title, body, labels }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      showStatus('Erreur: ' + (err.message || resp.status), 'err');
+      return false;
+    }
+
+    const issue = await resp.json();
+    showStatus('Envoye ! Issue #' + issue.number + ' — En attente de generation sur le PC', 'ok');
+    return true;
+  } catch (e) {
+    showStatus('Erreur reseau: ' + e.message, 'err');
+    return false;
+  }
+}
+
+// ── Send Note ──
+async function sendNote() {
+  const sujet = document.getElementById('noteSujet').value.trim();
+  const categorie = document.getElementById('noteCategorie').value;
+  if (!sujet) { showStatus('Entrez un sujet', 'err'); return; }
+
+  const body = JSON.stringify({ action: 'generate_note', sujet, categorie });
+  await createIssue(
+    `[NLG-NOTE] ${sujet}`,
+    '```json\n' + body + '\n```',
+    ['nlg-request', 'note']
+  );
+}
+
+// ── Send Canvas ──
+async function sendCanvas() {
+  const sujet = document.getElementById('canvasSujet').value.trim();
+  const mode = document.getElementById('canvasMode').value;
+  const template = document.getElementById('canvasTemplate').value;
+  if (!sujet) { showStatus('Entrez un sujet', 'err'); return; }
+
+  const body = JSON.stringify({ action: 'generate_canvas', sujet, mode, template: template || null });
+  await createIssue(
+    `[NLG-CANVAS] ${sujet}`,
+    '```json\n' + body + '\n```',
+    ['nlg-request', 'canvas']
+  );
+}
+
+// Init
+loadConfig();
+</script>
+</body>
+</html>
