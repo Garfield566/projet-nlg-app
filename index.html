@@ -3,280 +3,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NLG - Generateur</title>
+<title>NLG</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, 'Segoe UI', sans-serif;
-    background: linear-gradient(155deg, #f2d4c4 0%, #ecc8b8 40%, #e8c4b0 100%);
-    min-height: 100vh; padding: 20px;
-    color: #4a3528;
-  }
-  .card {
-    background: #fffbf7; border-radius: 20px; padding: 24px;
-    box-shadow: 0 8px 32px rgba(100,60,30,0.1);
-    max-width: 420px; margin: 0 auto;
-  }
-  h1 {
-    font-size: 28px; font-weight: 600; color: #6b3a3a;
-    font-style: italic; margin-bottom: 4px;
-    font-family: Georgia, serif;
-  }
-  .subtitle { font-size: 12px; color: #b0967e; margin-bottom: 20px; }
-  label {
-    display: block; font-size: 11px; color: #8a6a50;
-    margin-bottom: 4px; font-weight: 600; letter-spacing: 0.04em;
-  }
-  input, select {
-    width: 100%; padding: 12px 14px; border: 1px solid rgba(180,140,100,0.25);
-    border-radius: 12px; font-size: 15px; background: rgba(255,255,255,0.85);
-    color: #4a3528; outline: none; margin-bottom: 14px;
-    -webkit-appearance: none;
-  }
-  input:focus, select:focus { border-color: #c4704b; box-shadow: 0 0 0 3px rgba(196,112,75,0.08); }
-  select { cursor: pointer; }
-  .row { display: flex; gap: 10px; }
-  .row > * { flex: 1; }
-  .btn {
-    width: 100%; padding: 14px; border: none; border-radius: 24px;
-    font-size: 15px; font-weight: 600; cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn-note {
-    background: linear-gradient(135deg, #c4836a, #b8705a);
-    color: #fff; box-shadow: 0 4px 16px rgba(180,100,70,0.2);
-    margin-bottom: 10px;
-  }
-  .btn-canvas {
-    background: linear-gradient(135deg, #4a6a8a, #3a5a7a);
-    color: #fff; box-shadow: 0 4px 16px rgba(60,80,120,0.2);
-    margin-bottom: 10px;
-  }
-  .btn-send {
-    background: linear-gradient(135deg, #4a3528, #3a2a1e);
-    color: #f5e6d3; box-shadow: 0 4px 16px rgba(50,30,15,0.15);
-  }
-  .btn:disabled { opacity: 0.4; cursor: default; }
-  .status {
-    margin-top: 14px; padding: 12px; border-radius: 12px;
-    font-size: 13px; text-align: center; display: none;
-  }
-  .status.ok { display: block; background: #e8f0e2; color: #4a6a3a; }
-  .status.err { display: block; background: #f5ebe8; color: #c45a4a; }
-  .status.loading { display: block; background: #eef2f8; color: #4a6a8a; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .tab {
-    flex: 1; padding: 10px; border-radius: 12px; text-align: center;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    border: 2px solid rgba(180,140,100,0.2); background: rgba(255,255,255,0.5);
-    color: #8a6a50; transition: all 0.2s;
-  }
-  .tab.active { border-color: #c4704b; background: rgba(196,112,75,0.08); color: #6b3a3a; }
-  .tab.active-blue { border-color: #4a6a8a; background: rgba(74,106,138,0.08); color: #3a5a7a; }
-  .section { display: none; }
-  .section.visible { display: block; }
-  .config {
-    margin-bottom: 16px; padding: 12px; border-radius: 12px;
-    background: rgba(245,235,225,0.5); border: 1px dashed rgba(180,140,100,0.3);
-  }
-  .config label { margin-bottom: 2px; }
-  .config input { margin-bottom: 8px; font-size: 12px; padding: 8px 10px; }
-  .saved { font-size: 11px; color: #6a8a5a; }
-  hr { border: none; border-top: 1px solid rgba(180,140,100,0.15); margin: 16px 0; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',-apple-system,sans-serif;
+  background:linear-gradient(155deg,#f2d4c4 0%,#ecc8b8 40%,#f0d0be 70%,#e8c4b0 100%);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+  color:#4a3528;
+}
+.app{
+  width:100%;max-width:520px;background:#fffbf7;border-radius:26px;
+  box-shadow:0 12px 48px rgba(100,60,30,.1),0 1px 3px rgba(100,60,30,.06);
+  border:1px solid rgba(200,170,140,.15);overflow:hidden;
+  display:flex;flex-direction:column;max-height:96vh;
+}
+.header{padding:24px 28px 14px;flex-shrink:0}
+.header h1{
+  font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;
+  font-style:italic;color:#6b3a3a;letter-spacing:.02em;
+}
+.header .line{width:50px;height:2px;background:linear-gradient(90deg,#c4704b,transparent);margin-top:6px}
+.list{flex:1;overflow-y:auto;padding:0 20px 8px;-webkit-overflow-scrolling:touch}
+
+/* Cards */
+.card{border-radius:18px;padding:18px 20px 16px;margin-bottom:12px;position:relative}
+.card-note{
+  background:linear-gradient(145deg,#f5e6d3,#f0dcc8);
+  border:1px solid rgba(180,140,100,.12);box-shadow:0 2px 16px rgba(150,100,70,.07);
+}
+.card-canvas{
+  background:linear-gradient(145deg,#dce4f0,#d4dce8);
+  border:1px solid rgba(74,106,138,.15);box-shadow:0 2px 16px rgba(60,80,120,.07);
+}
+.card-tag{position:absolute;top:7px;left:14px;font-size:10px;font-weight:600}
+.card-note .card-tag{color:#c4a882}
+.card-canvas .card-tag{color:#8a9ab0}
+.card .remove{
+  position:absolute;top:7px;right:12px;background:none;border:none;
+  font-size:16px;cursor:pointer;opacity:.4;padding:4px;color:#b08060;
+}
+.card .remove:hover{opacity:1}
+label{display:block;font-size:11px;font-style:italic;color:#8a6a50;margin-bottom:3px;letter-spacing:.03em;
+  font-family:'Cormorant Garamond',serif;}
+.card-canvas label{color:#6a8aaa}
+input,select{
+  width:100%;padding:10px 12px;border:1px solid rgba(180,140,100,.25);border-radius:10px;
+  background:rgba(255,255,255,.85);font-size:14px;font-family:'DM Sans',sans-serif;
+  color:#4a3528;outline:none;margin-bottom:10px;-webkit-appearance:none;
+}
+input:focus,select:focus{border-color:#c4704b;box-shadow:0 0 0 3px rgba(196,112,75,.08)}
+.card-canvas input:focus,.card-canvas select:focus{border-color:#4a6a8a;box-shadow:0 0 0 3px rgba(74,106,138,.08)}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' stroke='%238a6a50' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+/* Status */
+.status{margin-top:8px;font-size:11px;display:flex;align-items:center;gap:5px}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.status-ready{color:#8aaa78}.status-ready .dot{background:#a8c49a}
+.status-sending{color:#b0967e}
+.status-done{color:#6a8a5a}.status-done .dot{background:#6a8a5a}
+.status-error{color:#c45a4a}.status-error .dot{background:#c45a4a}
+
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spinner{
+  width:10px;height:10px;border:2px solid rgba(180,140,100,.3);border-top-color:#b0967e;
+  border-radius:50%;display:inline-block;animation:spin .7s linear infinite;
+}
+
+/* Footer */
+.footer{
+  padding:12px 20px 18px;flex-shrink:0;
+  border-top:1px solid rgba(180,140,100,.1);background:rgba(255,251,247,.95);
+}
+.btn{
+  width:100%;padding:13px;border:none;border-radius:24px;font-size:14px;font-weight:600;
+  font-family:'DM Sans',sans-serif;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:active{transform:scale(.98)}
+.btn-row{display:flex;gap:10px;margin-bottom:10px}
+.btn-row .btn{flex:1}
+.btn-note{background:linear-gradient(135deg,#c4836a,#b8705a);color:#fff;box-shadow:0 3px 12px rgba(180,100,70,.15)}
+.btn-canvas{background:linear-gradient(135deg,#4a6a8a,#3a5a7a);color:#fff;box-shadow:0 3px 12px rgba(60,80,120,.15)}
+.btn-generate{background:linear-gradient(135deg,#4a3528,#3a2a1e);color:#f5e6d3;box-shadow:0 3px 12px rgba(50,30,15,.15)}
+.btn-generate:disabled{background:rgba(180,160,140,.3);color:#b0a090;box-shadow:none;cursor:default}
+.btn-reset{background:linear-gradient(135deg,#c4836a,#b8705a);color:#fff}
+
+/* Config (discret) */
+.config-toggle{
+  text-align:center;font-size:10px;color:#c4a882;cursor:pointer;padding:6px;
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+}
+.config{display:none;padding:0 20px 12px}
+.config.visible{display:block}
+.config input{font-size:12px;padding:8px 10px;margin-bottom:6px}
+.config .btn{padding:8px;font-size:12px;margin-bottom:0}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>NLG Mobile</h1>
-  <p class="subtitle">Generateur de notes & canvas Obsidian</p>
-
-  <!-- Config GitHub (une seule fois) -->
-  <div class="config" id="configSection">
-    <label>GITHUB TOKEN</label>
-    <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
-    <label>REPO (owner/name)</label>
-    <input type="text" id="repo" placeholder="ex: monuser/projet-nlg-app">
-    <button class="btn btn-note" onclick="saveConfig()" style="padding:10px; font-size:13px;">
-      Sauvegarder
-    </button>
-    <span class="saved" id="configSaved"></span>
+<div class="app">
+  <div class="header">
+    <h1>Nouvelle note</h1>
+    <div class="line"></div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" id="tabNote" onclick="switchTab('note')">Note</div>
-    <div class="tab" id="tabCanvas" onclick="switchTab('canvas')">Canvas</div>
-  </div>
+  <div class="list" id="list"></div>
 
-  <!-- Note form -->
-  <div class="section visible" id="noteSection">
-    <label>SUJET</label>
-    <input type="text" id="noteSujet" placeholder="ex: Theoreme de Pythagore">
-    <div class="row">
-      <div>
-        <label>CATEGORIE</label>
-        <select id="noteCategorie">
-          <option value="concept">Concept</option>
-          <option value="evenement">Evenement</option>
-          <option value="personnage-scientifique">Personnage scientifique</option>
-          <option value="personnage-militaire">Personnage militaire</option>
-          <option value="personnage-artiste">Personnage artiste</option>
-          <option value="personnage-souverain">Personnage souverain</option>
-          <option value="lieu">Lieu</option>
-          <option value="oeuvre">Oeuvre</option>
-          <option value="organisation">Organisation</option>
-          <option value="periode">Periode</option>
-          <option value="processus">Processus</option>
-          <option value="theoreme">Theoreme</option>
-          <option value="conjecture">Conjecture</option>
-        </select>
-      </div>
+  <div class="footer">
+    <div class="btn-row">
+      <button class="btn btn-note" onclick="addItem('note')">+ note</button>
+      <button class="btn btn-canvas" onclick="addItem('canvas')">Canvas</button>
     </div>
-    <button class="btn btn-send" id="btnNote" onclick="sendNote()">
-      Envoyer
-    </button>
+    <button class="btn btn-generate" id="btnGenerate" onclick="generateAll()" disabled>Generate all</button>
+    <div id="doneMsg" style="display:none;text-align:center;padding:10px 0 4px;font-size:14px;color:#6a8a5a;font-weight:600"></div>
+    <button class="btn btn-reset" id="btnReset" style="display:none;margin-top:8px" onclick="resetAll()">Nouvelle session</button>
   </div>
 
-  <!-- Canvas form -->
-  <div class="section" id="canvasSection">
-    <label>SUJET / TAG / DOSSIER</label>
-    <input type="text" id="canvasSujet" placeholder="ex: Guerre froide, mathematiques">
-    <div class="row">
-      <div>
-        <label>MODE</label>
-        <select id="canvasMode">
-          <option value="normal">Sujet (Wikipedia)</option>
-          <option value="tag">Tag</option>
-          <option value="dossier">Dossier</option>
-        </select>
-      </div>
-      <div>
-        <label>TEMPLATE</label>
-        <select id="canvasTemplate">
-          <option value="">Auto</option>
-          <option value="mindmap">Mindmap</option>
-          <option value="grid">Grille</option>
-          <option value="tree">Arbre</option>
-          <option value="flowchart">Flowchart</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn btn-send" id="btnCanvas" onclick="sendCanvas()">
-      Envoyer
-    </button>
+  <div class="config-toggle" onclick="toggleConfig()">Config GitHub</div>
+  <div class="config" id="configPanel">
+    <label style="color:#8a6a50">Token GitHub</label>
+    <input type="password" id="cfgToken" placeholder="ghp_xxxxxxxxxxxx">
+    <label style="color:#8a6a50">Repo (owner/name)</label>
+    <input type="text" id="cfgRepo" placeholder="Garfield566/projet-nlg-app">
+    <button class="btn btn-note" onclick="saveConfig()">Sauvegarder</button>
   </div>
-
-  <div class="status" id="status"></div>
 </div>
 
 <script>
-// ── Config persistence ──
-function saveConfig() {
-  const token = document.getElementById('token').value.trim();
-  const repo = document.getElementById('repo').value.trim();
-  if (token && repo) {
-    localStorage.setItem('nlg_token', token);
-    localStorage.setItem('nlg_repo', repo);
-    document.getElementById('configSaved').textContent = 'Sauvegarde !';
-    document.getElementById('configSection').style.display = 'none';
-  }
+const CATEGORIES = [
+  {v:"concept",l:"Concept"},{v:"evenement",l:"Evenement"},
+  {v:"personnage-scientifique",l:"Personnage scientifique"},
+  {v:"personnage-militaire",l:"Personnage militaire"},
+  {v:"personnage-artiste",l:"Personnage artiste"},
+  {v:"personnage-souverain",l:"Personnage souverain"},
+  {v:"lieu",l:"Lieu"},{v:"oeuvre",l:"Oeuvre"},{v:"organisation",l:"Organisation"},
+  {v:"periode",l:"Periode"},{v:"processus",l:"Processus"},
+  {v:"theoreme",l:"Theoreme"},{v:"conjecture",l:"Conjecture"},
+];
+const TEMPLATES_CANVAS = [
+  {v:"",l:"Auto"},{v:"mindmap",l:"Mindmap"},{v:"grid",l:"Grille"},
+  {v:"tree",l:"Arbre"},{v:"flowchart",l:"Flowchart"},{v:"cycle",l:"Cycle"},
+];
+const MODES_CANVAS = [
+  {v:"normal",l:"Sujet (Wikipedia)"},{v:"tag",l:"Tag"},{v:"dossier",l:"Dossier"},
+];
+
+let items = [];
+let nextId = 1;
+
+function addItem(kind) {
+  items.push({
+    id: nextId++, kind,
+    sujet: "", categorie: "concept", canvasType: "normal", template: "",
+    status: "idle", error: null,
+  });
+  render();
 }
 
-function loadConfig() {
-  const token = localStorage.getItem('nlg_token');
-  const repo = localStorage.getItem('nlg_repo');
-  if (token && repo) {
-    document.getElementById('token').value = token;
-    document.getElementById('repo').value = repo;
-    document.getElementById('configSection').style.display = 'none';
-  }
-  return { token, repo };
+function removeItem(id) {
+  if (items.length > 1) { items = items.filter(i => i.id !== id); render(); }
 }
 
-// ── Tabs ──
-function switchTab(tab) {
-  document.getElementById('tabNote').className = tab === 'note' ? 'tab active' : 'tab';
-  document.getElementById('tabCanvas').className = tab === 'canvas' ? 'tab active-blue' : 'tab';
-  document.getElementById('noteSection').className = tab === 'note' ? 'section visible' : 'section';
-  document.getElementById('canvasSection').className = tab === 'canvas' ? 'section visible' : 'section';
+function updateItem(id, field, val) {
+  const it = items.find(i => i.id === id);
+  if (it) { it[field] = val; render(); }
 }
 
-// ── Status display ──
-function showStatus(msg, type) {
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = 'status ' + type;
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = items.map((it, idx) => it.kind === "note" ? renderNote(it, idx) : renderCanvas(it, idx)).join("");
+  const ready = items.filter(i => i.sujet.trim() && (i.kind === "canvas" || i.categorie));
+  const done = items.filter(i => i.status === "done").length;
+  const allDone = done > 0 && done === items.filter(i => i.sujet.trim()).length;
+  document.getElementById("btnGenerate").disabled = ready.length === 0 || allDone;
+  document.getElementById("btnGenerate").style.display = allDone ? "none" : "flex";
+  document.getElementById("doneMsg").style.display = allDone ? "block" : "none";
+  document.getElementById("doneMsg").textContent = allDone ? `✓ ${done} element${done>1?"s":""} genere${done>1?"s":""}` : "";
+  document.getElementById("btnReset").style.display = allDone ? "block" : "none";
 }
 
-// ── GitHub Issue creation ──
+function renderNote(it, idx) {
+  const catOpts = CATEGORIES.map(c => `<option value="${c.v}" ${it.categorie===c.v?"selected":""}>${c.l}</option>`).join("");
+  return `<div class="card card-note">
+    <span class="card-tag">#${idx+1}</span>
+    ${items.length>1?`<button class="remove" onclick="removeItem(${it.id})">✕</button>`:""}
+    <div style="margin-top:6px">
+      <label>Sujet</label>
+      <input type="text" value="${esc(it.sujet)}" placeholder="ex: Pythagore, Guerre froide…"
+        oninput="updateItem(${it.id},'sujet',this.value)">
+    </div>
+    <div class="row">
+      <div><label>Categorie</label><select onchange="updateItem(${it.id},'categorie',this.value)">${catOpts}</select></div>
+    </div>
+    ${statusHtml(it)}
+  </div>`;
+}
+
+function renderCanvas(it, idx) {
+  const modeOpts = MODES_CANVAS.map(m => `<option value="${m.v}" ${it.canvasType===m.v?"selected":""}>${m.l}</option>`).join("");
+  const tplOpts = TEMPLATES_CANVAS.map(t => `<option value="${t.v}" ${it.template===t.v?"selected":""}>${t.l}</option>`).join("");
+  return `<div class="card card-canvas">
+    <span class="card-tag">Canvas</span>
+    ${items.length>1?`<button class="remove" onclick="removeItem(${it.id})" style="color:#6a8aaa">✕</button>`:""}
+    <div style="margin-top:6px">
+      <label>Sujet / Tags / Dossier</label>
+      <input type="text" value="${esc(it.sujet)}" placeholder="ex: Guerre froide, mathematiques…"
+        oninput="updateItem(${it.id},'sujet',this.value)" style="border-color:rgba(74,106,138,.2)">
+    </div>
+    <div class="row">
+      <div><label>Mode</label><select onchange="updateItem(${it.id},'canvasType',this.value)" style="border-color:rgba(74,106,138,.2)">${modeOpts}</select></div>
+      <div><label>Template</label><select onchange="updateItem(${it.id},'template',this.value)" style="border-color:rgba(74,106,138,.2)">${tplOpts}</select></div>
+    </div>
+    ${statusHtml(it)}
+  </div>`;
+}
+
+function statusHtml(it) {
+  if (it.status === "idle" && it.sujet.trim()) return `<div class="status status-ready"><span class="dot"></span>Pret</div>`;
+  if (it.status === "sending") return `<div class="status status-sending"><span class="spinner"></span>Envoi…</div>`;
+  if (it.status === "done") return `<div class="status status-done"><span class="dot"></span>✓ Envoye — generation en cours sur le PC</div>`;
+  if (it.status === "error") return `<div class="status status-error"><span class="dot"></span>${esc(it.error)}</div>`;
+  return "";
+}
+
+function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
+// GitHub Issue creation
 async function createIssue(title, body, labels) {
-  const { token, repo } = loadConfig();
-  if (!token || !repo) {
-    document.getElementById('configSection').style.display = 'block';
-    showStatus('Configurez le token GitHub et le repo', 'err');
-    return false;
-  }
+  const token = localStorage.getItem("nlg_token");
+  const repo = localStorage.getItem("nlg_repo");
+  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub"); }
 
-  showStatus('Envoi en cours...', 'loading');
+  const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ title, body, labels }),
+  });
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.status); }
+  return resp.json();
+}
 
-  try {
-    const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json',
-      },
-      body: JSON.stringify({ title, body, labels }),
-    });
+async function generateAll() {
+  const ready = items.filter(i => i.sujet.trim());
+  if (!ready.length) return;
 
-    if (!resp.ok) {
-      const err = await resp.json();
-      showStatus('Erreur: ' + (err.message || resp.status), 'err');
-      return false;
+  for (const it of ready) {
+    if (it.status === "done") continue;
+    it.status = "sending"; render();
+
+    try {
+      if (it.kind === "note") {
+        const body = JSON.stringify({ action: "generate_note", sujet: it.sujet, categorie: it.categorie });
+        await createIssue(`[NLG-NOTE] ${it.sujet}`, "```json\n"+body+"\n```", ["nlg-request","note"]);
+      } else {
+        const body = JSON.stringify({ action: "generate_canvas", sujet: it.sujet, mode: it.canvasType, template: it.template || null });
+        await createIssue(`[NLG-CANVAS] ${it.sujet}`, "```json\n"+body+"\n```", ["nlg-request","canvas"]);
+      }
+      it.status = "done";
+    } catch (e) {
+      it.status = "error"; it.error = e.message;
     }
-
-    const issue = await resp.json();
-    showStatus('Envoye ! Issue #' + issue.number + ' — En attente de generation sur le PC', 'ok');
-    return true;
-  } catch (e) {
-    showStatus('Erreur reseau: ' + e.message, 'err');
-    return false;
+    render();
   }
 }
 
-// ── Send Note ──
-async function sendNote() {
-  const sujet = document.getElementById('noteSujet').value.trim();
-  const categorie = document.getElementById('noteCategorie').value;
-  if (!sujet) { showStatus('Entrez un sujet', 'err'); return; }
-
-  const body = JSON.stringify({ action: 'generate_note', sujet, categorie });
-  await createIssue(
-    `[NLG-NOTE] ${sujet}`,
-    '```json\n' + body + '\n```',
-    ['nlg-request', 'note']
-  );
+function resetAll() {
+  items = []; nextId = 1;
+  addItem("note");
 }
 
-// ── Send Canvas ──
-async function sendCanvas() {
-  const sujet = document.getElementById('canvasSujet').value.trim();
-  const mode = document.getElementById('canvasMode').value;
-  const template = document.getElementById('canvasTemplate').value;
-  if (!sujet) { showStatus('Entrez un sujet', 'err'); return; }
-
-  const body = JSON.stringify({ action: 'generate_canvas', sujet, mode, template: template || null });
-  await createIssue(
-    `[NLG-CANVAS] ${sujet}`,
-    '```json\n' + body + '\n```',
-    ['nlg-request', 'canvas']
-  );
+// Config
+function toggleConfig() {
+  document.getElementById("configPanel").classList.toggle("visible");
+}
+function saveConfig() {
+  const t = document.getElementById("cfgToken").value.trim();
+  const r = document.getElementById("cfgRepo").value.trim();
+  if (t && r) {
+    localStorage.setItem("nlg_token", t);
+    localStorage.setItem("nlg_repo", r);
+    document.getElementById("configPanel").classList.remove("visible");
+  }
+}
+function loadConfig() {
+  const t = localStorage.getItem("nlg_token");
+  const r = localStorage.getItem("nlg_repo");
+  if (t) document.getElementById("cfgToken").value = t;
+  if (r) document.getElementById("cfgRepo").value = r;
 }
 
 // Init
 loadConfig();
+addItem("note");
 </script>
 </body>
 </html>
