@@ -168,7 +168,7 @@ def process_canvas(cmd, issue_number):
 
     vault_path = os.environ.get(
         'NLG_VAULT_PATH',
-        r'C:\Users\3TTT\OneDrive\obsidiane\Cerveau',
+        r'C:\Users\robin tual\quartz\content',
     )
     config = PipelineConfig.from_vault(vault_path)
     pipeline = CanvasPipeline(config=config, vault_path=vault_path)
