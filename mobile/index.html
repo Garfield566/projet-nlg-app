@@ -232,6 +232,7 @@ function statusHtml(it) {
 
 function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
 
+// GitHub Issue creation
 async function createIssue(title, body, labels) {
   const token = localStorage.getItem("nlg_token");
   const repo = localStorage.getItem("nlg_repo");
@@ -275,10 +276,10 @@ function resetAll() {
   addItem("note");
 }
 
+// Config
 function toggleConfig() {
   document.getElementById("configPanel").classList.toggle("visible");
 }
-
 function saveConfig() {
   const t = document.getElementById("cfgToken").value.trim();
   const r = document.getElementById("cfgRepo").value.trim();
@@ -288,7 +289,6 @@ function saveConfig() {
     document.getElementById("configPanel").classList.remove("visible");
   }
 }
-
 function loadConfig() {
   const t = localStorage.getItem("nlg_token");
   const r = localStorage.getItem("nlg_repo");
@@ -296,6 +296,7 @@ function loadConfig() {
   if (r) document.getElementById("cfgRepo").value = r;
 }
 
+// Init
 loadConfig();
 addItem("note");
 </script>
