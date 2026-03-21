@@ -95,7 +95,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 
 /* Modal */
 .modal{
-  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);
   display:flex;align-items:center;justify-content:center;z-index:1000;
 }
 .modal-content{
@@ -111,6 +111,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   margin-bottom:8px;cursor:pointer;transition:all 0.2s;
 }
 .candidate:hover{background:#f0ede8;border-color:#a8c49a}
+.candidate.selected{background:#e8f0e2;border-color:#a8c49a}
 .candidate .qid{font-weight:600;color:#4a6a3a;font-size:12px}
 .candidate .label{font-weight:500;margin:4px 0}
 .candidate .desc{font-size:11px;color:#b0967e}
@@ -187,7 +188,7 @@ const MODES_CANVAS = [
 
 let items = [];
 let nextId = 1;
-let pendingItem = null;
+let pendingItemId = null;
 let pendingCandidates = [];
 
 function addItem(kind) {
@@ -268,16 +269,17 @@ function statusHtml(it) {
 function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
 
 async function fetchWikidataCandidates(sujet) {
+  console.log("Recherche Wikidata pour:", sujet);
   try {
     const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(sujet)}&language=fr&format=json&origin=*&limit=5`;
     const resp = await fetch(url);
     const data = await resp.json();
+    console.log("Réponse Wikidata:", data);
     if (data.search && data.search.length > 0) {
       return data.search.map(item => ({
         qid: item.id,
         label: item.label,
         description: item.description || "",
-        url: `https://www.wikidata.org/wiki/${item.id}`
       }));
     }
   } catch(e) {
@@ -287,27 +289,39 @@ async function fetchWikidataCandidates(sujet) {
 }
 
 async function prepareGeneration() {
+  console.log("prepareGeneration appelé");
+  
   const readyNotes = items.filter(i => i.sujet.trim() && i.kind === "note" && i.status !== "done");
   const readyCanvas = items.filter(i => i.sujet.trim() && i.kind === "canvas" && i.status !== "done");
   
+  console.log("Notes prêtes:", readyNotes.length);
+  console.log("Canvas prêts:", readyCanvas.length);
+  
+  // Si pas de notes, générer directement les canvas
   if (readyNotes.length === 0) {
     generateAll();
     return;
   }
   
+  // Prendre la première note non traitée
   const firstNote = readyNotes[0];
-  pendingItem = firstNote;
+  pendingItemId = firstNote.id;
+  console.log("Vérification Wikidata pour:", firstNote.sujet);
   
   const candidates = await fetchWikidataCandidates(firstNote.sujet);
+  console.log("Candidats trouvés:", candidates.length);
   
+  // Si 0 ou 1 candidat, on génère directement
   if (candidates.length <= 1) {
     if (candidates.length === 1) {
       firstNote.selectedQid = candidates[0].qid;
+      console.log("QID sélectionné auto:", firstNote.selectedQid);
     }
     generateAll();
     return;
   }
   
+  // Plusieurs candidats -> afficher la modale
   pendingCandidates = candidates;
   showModal(candidates);
 }
@@ -331,26 +345,31 @@ function selectCandidate(idx) {
   const candidates = document.querySelectorAll(".candidate");
   candidates.forEach((c, i) => {
     if (i === idx) {
-      c.style.background = "#e8f0e2";
-      c.style.borderColor = "#a8c49a";
+      c.classList.add("selected");
     } else {
-      c.style.background = "";
-      c.style.borderColor = "";
+      c.classList.remove("selected");
     }
   });
   
-  if (pendingItem) {
-    pendingItem.selectedQid = pendingCandidates[idx].qid;
+  const item = items.find(i => i.id === pendingItemId);
+  if (item && pendingCandidates[idx]) {
+    item.selectedQid = pendingCandidates[idx].qid;
+    console.log("QID sélectionné:", item.selectedQid);
   }
 }
 
 function closeModal() {
   document.getElementById("wikidataModal").style.display = "none";
-  pendingItem = null;
+  pendingItemId = null;
   pendingCandidates = [];
 }
 
 function confirmWithQid() {
+  const item = items.find(i => i.id === pendingItemId);
+  if (item && !item.selectedQid) {
+    alert("Veuillez sélectionner une correspondance");
+    return;
+  }
   closeModal();
   generateAll();
 }
@@ -358,14 +377,20 @@ function confirmWithQid() {
 async function createIssue(title, body, labels) {
   const token = localStorage.getItem("nlg_token");
   const repo = localStorage.getItem("nlg_repo");
-  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub"); }
+  if (!token || !repo) { 
+    toggleConfig(); 
+    throw new Error("Configurez GitHub dans Config"); 
+  }
 
   const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ title, body, labels }),
   });
-  if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.status); }
+  if (!resp.ok) { 
+    const e = await resp.json(); 
+    throw new Error(e.message || resp.status); 
+  }
   return resp.json();
 }
 
@@ -375,13 +400,15 @@ async function generateAll() {
 
   for (const it of ready) {
     if (it.status === "done") continue;
-    it.status = "sending"; render();
+    it.status = "sending"; 
+    render();
 
     try {
       if (it.kind === "note") {
         let cmd = { action: "generate_note", sujet: it.sujet, categorie: it.categorie };
         if (it.selectedQid) {
           cmd.qid = it.selectedQid;
+          console.log("Envoi avec QID:", it.selectedQid);
         }
         const body = JSON.stringify(cmd);
         await createIssue(`[NLG-NOTE] ${it.sujet}`, "```json\n"+body+"\n```", ["nlg-request","note"]);
@@ -391,7 +418,9 @@ async function generateAll() {
       }
       it.status = "done";
     } catch (e) {
-      it.status = "error"; it.error = e.message;
+      it.status = "error"; 
+      it.error = e.message;
+      console.error("Erreur:", e);
     }
     render();
   }
@@ -414,6 +443,7 @@ function saveConfig() {
     localStorage.setItem("nlg_token", t);
     localStorage.setItem("nlg_repo", r);
     document.getElementById("configPanel").classList.remove("visible");
+    alert("Configuration sauvegardée !");
   }
 }
 
@@ -424,8 +454,12 @@ function loadConfig() {
   if (r) document.getElementById("cfgRepo").value = r;
 }
 
+// Initialisation
 loadConfig();
 addItem("note");
+
+// Pour debug - ouvrir la console F12 pour voir les logs
+console.log("Page chargée - ouvrez la console (F12) pour voir les logs");
 </script>
 </body>
 </html>
