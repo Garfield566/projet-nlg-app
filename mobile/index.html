@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NLG - Générateur de notes</title>
+<title>NLG</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -93,30 +93,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .btn-generate:disabled{background:rgba(180,160,140,.3);color:#b0a090;box-shadow:none;cursor:default}
 .btn-reset{background:linear-gradient(135deg,#c4836a,#b8705a);color:#fff}
 
-/* Modal */
-.modal{
-  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);
-  display:flex;align-items:center;justify-content:center;z-index:1000;
-}
-.modal-content{
-  background:#fffbf7;border-radius:22px;max-width:500px;width:90%;
-  max-height:80vh;overflow:auto;padding:24px;
-}
-.modal-content h3{
-  font-family:'Cormorant Garamond',serif;font-size:22px;color:#6b3a3a;margin-bottom:8px;
-}
-.modal-content p{font-size:12px;color:#b0967e;margin-bottom:16px}
-.candidate{
-  padding:12px;border:1px solid rgba(168,196,154,0.3);border-radius:12px;
-  margin-bottom:8px;cursor:pointer;transition:all 0.2s;
-}
-.candidate:hover{background:#f0ede8;border-color:#a8c49a}
-.candidate.selected{background:#e8f0e2;border-color:#a8c49a}
-.candidate .qid{font-weight:600;color:#4a6a3a;font-size:12px}
-.candidate .label{font-weight:500;margin:4px 0}
-.candidate .desc{font-size:11px;color:#b0967e}
-
-/* Config */
+/* Config (discret) */
 .config-toggle{
   text-align:center;font-size:10px;color:#c4a882;cursor:pointer;padding:6px;
   font-family:'Cormorant Garamond',serif;font-style:italic;
@@ -124,6 +101,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .config{display:none;padding:0 20px 12px}
 .config.visible{display:block}
 .config input{font-size:12px;padding:8px 10px;margin-bottom:6px}
+.config .btn{padding:8px;font-size:12px;margin-bottom:0}
 </style>
 </head>
 <body>
@@ -140,7 +118,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       <button class="btn btn-note" onclick="addItem('note')">+ note</button>
       <button class="btn btn-canvas" onclick="addItem('canvas')">Canvas</button>
     </div>
-    <button class="btn btn-generate" id="btnGenerate" onclick="prepareGeneration()" disabled>Generate all</button>
+    <button class="btn btn-generate" id="btnGenerate" onclick="generateAll()" disabled>Generate all</button>
     <div id="doneMsg" style="display:none;text-align:center;padding:10px 0 4px;font-size:14px;color:#6a8a5a;font-weight:600"></div>
     <button class="btn btn-reset" id="btnReset" style="display:none;margin-top:8px" onclick="resetAll()">Nouvelle session</button>
   </div>
@@ -152,18 +130,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     <label style="color:#8a6a50">Repo (owner/name)</label>
     <input type="text" id="cfgRepo" placeholder="Garfield566/projet-nlg-app">
     <button class="btn btn-note" onclick="saveConfig()">Sauvegarder</button>
-  </div>
-</div>
-
-<div id="wikidataModal" class="modal" style="display:none">
-  <div class="modal-content">
-    <h3>Confirmation Wikidata</h3>
-    <p>Vérifiez les correspondances avant de générer</p>
-    <div id="candidatesList"></div>
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button onclick="closeModal()" style="flex:1;padding:10px;background:none;border:1px solid rgba(180,140,100,0.3);border-radius:22px;cursor:pointer">Annuler</button>
-      <button id="confirmBtn" onclick="confirmWithQid()" style="flex:2;padding:10px;background:linear-gradient(135deg,#4a7a3a,#3a6a2a);border:none;border-radius:22px;color:#fff;cursor:pointer">Générer</button>
-    </div>
   </div>
 </div>
 
@@ -188,14 +154,12 @@ const MODES_CANVAS = [
 
 let items = [];
 let nextId = 1;
-let pendingItemId = null;
-let pendingCandidates = [];
 
 function addItem(kind) {
   items.push({
     id: nextId++, kind,
     sujet: "", categorie: "concept", canvasType: "normal", template: "",
-    status: "idle", error: null, selectedQid: null
+    status: "idle", error: null,
   });
   render();
 }
@@ -268,149 +232,31 @@ function statusHtml(it) {
 
 function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
 
-async function fetchWikidataCandidates(sujet) {
-  console.log("Recherche Wikidata pour:", sujet);
-  try {
-    const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(sujet)}&language=fr&format=json&origin=*&limit=5`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-    console.log("Réponse Wikidata:", data);
-    if (data.search && data.search.length > 0) {
-      return data.search.map(item => ({
-        qid: item.id,
-        label: item.label,
-        description: item.description || "",
-      }));
-    }
-  } catch(e) {
-    console.error("Erreur Wikidata:", e);
-  }
-  return [];
-}
-
-async function prepareGeneration() {
-  console.log("prepareGeneration appelé");
-  
-  const readyNotes = items.filter(i => i.sujet.trim() && i.kind === "note" && i.status !== "done");
-  const readyCanvas = items.filter(i => i.sujet.trim() && i.kind === "canvas" && i.status !== "done");
-  
-  console.log("Notes prêtes:", readyNotes.length);
-  console.log("Canvas prêts:", readyCanvas.length);
-  
-  // Si pas de notes, générer directement les canvas
-  if (readyNotes.length === 0) {
-    generateAll();
-    return;
-  }
-  
-  // Prendre la première note non traitée
-  const firstNote = readyNotes[0];
-  pendingItemId = firstNote.id;
-  console.log("Vérification Wikidata pour:", firstNote.sujet);
-  
-  const candidates = await fetchWikidataCandidates(firstNote.sujet);
-  console.log("Candidats trouvés:", candidates.length);
-  
-  // Si 0 ou 1 candidat, on génère directement
-  if (candidates.length <= 1) {
-    if (candidates.length === 1) {
-      firstNote.selectedQid = candidates[0].qid;
-      console.log("QID sélectionné auto:", firstNote.selectedQid);
-    }
-    generateAll();
-    return;
-  }
-  
-  // Plusieurs candidats -> afficher la modale
-  pendingCandidates = candidates;
-  showModal(candidates);
-}
-
-function showModal(candidates) {
-  const modal = document.getElementById("wikidataModal");
-  const list = document.getElementById("candidatesList");
-  
-  list.innerHTML = candidates.map((c, idx) => `
-    <div class="candidate" onclick="selectCandidate(${idx})" data-idx="${idx}">
-      <div class="qid">${esc(c.qid)}</div>
-      <div class="label">${esc(c.label)}</div>
-      <div class="desc">${esc(c.description)}</div>
-    </div>
-  `).join("");
-  
-  modal.style.display = "flex";
-}
-
-function selectCandidate(idx) {
-  const candidates = document.querySelectorAll(".candidate");
-  candidates.forEach((c, i) => {
-    if (i === idx) {
-      c.classList.add("selected");
-    } else {
-      c.classList.remove("selected");
-    }
-  });
-  
-  const item = items.find(i => i.id === pendingItemId);
-  if (item && pendingCandidates[idx]) {
-    item.selectedQid = pendingCandidates[idx].qid;
-    console.log("QID sélectionné:", item.selectedQid);
-  }
-}
-
-function closeModal() {
-  document.getElementById("wikidataModal").style.display = "none";
-  pendingItemId = null;
-  pendingCandidates = [];
-}
-
-function confirmWithQid() {
-  const item = items.find(i => i.id === pendingItemId);
-  if (item && !item.selectedQid) {
-    alert("Veuillez sélectionner une correspondance");
-    return;
-  }
-  closeModal();
-  generateAll();
-}
-
 async function createIssue(title, body, labels) {
   const token = localStorage.getItem("nlg_token");
   const repo = localStorage.getItem("nlg_repo");
-  if (!token || !repo) { 
-    toggleConfig(); 
-    throw new Error("Configurez GitHub dans Config"); 
-  }
+  if (!token || !repo) { toggleConfig(); throw new Error("Configurez GitHub"); }
 
   const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ title, body, labels }),
   });
-  if (!resp.ok) { 
-    const e = await resp.json(); 
-    throw new Error(e.message || resp.status); 
-  }
+  if (!resp.ok) { const e = await resp.json(); throw new Error(e.message || resp.status); }
   return resp.json();
 }
 
 async function generateAll() {
-  const ready = items.filter(i => i.sujet.trim() && i.status !== "done");
+  const ready = items.filter(i => i.sujet.trim());
   if (!ready.length) return;
 
   for (const it of ready) {
     if (it.status === "done") continue;
-    it.status = "sending"; 
-    render();
+    it.status = "sending"; render();
 
     try {
       if (it.kind === "note") {
-        let cmd = { action: "generate_note", sujet: it.sujet, categorie: it.categorie };
-        if (it.selectedQid) {
-          cmd.qid = it.selectedQid;
-          console.log("Envoi avec QID:", it.selectedQid);
-        }
-        const body = JSON.stringify(cmd);
+        const body = JSON.stringify({ action: "generate_note", sujet: it.sujet, categorie: it.categorie });
         await createIssue(`[NLG-NOTE] ${it.sujet}`, "```json\n"+body+"\n```", ["nlg-request","note"]);
       } else {
         const body = JSON.stringify({ action: "generate_canvas", sujet: it.sujet, mode: it.canvasType, template: it.template || null });
@@ -418,17 +264,14 @@ async function generateAll() {
       }
       it.status = "done";
     } catch (e) {
-      it.status = "error"; 
-      it.error = e.message;
-      console.error("Erreur:", e);
+      it.status = "error"; it.error = e.message;
     }
     render();
   }
 }
 
 function resetAll() {
-  items = [];
-  nextId = 1;
+  items = []; nextId = 1;
   addItem("note");
 }
 
@@ -443,7 +286,6 @@ function saveConfig() {
     localStorage.setItem("nlg_token", t);
     localStorage.setItem("nlg_repo", r);
     document.getElementById("configPanel").classList.remove("visible");
-    alert("Configuration sauvegardée !");
   }
 }
 
@@ -454,12 +296,8 @@ function loadConfig() {
   if (r) document.getElementById("cfgRepo").value = r;
 }
 
-// Initialisation
 loadConfig();
 addItem("note");
-
-// Pour debug - ouvrir la console F12 pour voir les logs
-console.log("Page chargée - ouvrez la console (F12) pour voir les logs");
 </script>
 </body>
 </html>
